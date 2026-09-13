@@ -204,8 +204,12 @@ function buildQuarterlySummary({ departments, transactions, year }) {
   let yearInTotal = 0;
   let yearOutTotal = 0;
 
-  for (const dept of departments.filter((d) => d.active !== false)) {
-    const cells = [dept.name];
+  // Every department is included here, active or not - a deactivated
+  // department's historical money still moved through the church's
+  // accounts and must stay traceable, otherwise the "TOTAL - ALL
+  // DEPARTMENTS" row below would include amounts no row above it shows.
+  for (const dept of departments) {
+    const cells = [dept.name + (dept.active === false ? ' (Inactive)' : '')];
     let deptYearIn = 0;
     let deptYearOut = 0;
     for (const q of quarters) {

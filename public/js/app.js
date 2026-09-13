@@ -206,23 +206,31 @@ async function loadDepartmentOptions() {
   departments = await api('/api/departments');
   const active = departments.filter((d) => d.active !== false);
 
-  const selects = ['txnDept', 'filterDept', 'monthlyDept', 'annualDept', 'rangeDept', 'catchupDept'];
-  selects.forEach((id) => {
+  // New entries (transactions, catch-up) can only be recorded against an
+  // active department. But reports, filters and statements must still
+  // reach a deactivated department's history - deactivating a fund never
+  // deletes its past records, so those pickers list every department.
+  const entryOnlySelects = ['txnDept', 'catchupDept'];
+  const reportingSelects = ['filterDept', 'monthlyDept', 'annualDept', 'rangeDept'];
+
+  function fillSelect(id, list, keepFirst) {
     const el = document.getElementById(id);
     if (!el) return;
-    const keepFirst = id === 'filterDept' || id === 'rangeDept';
     const currentFirst = keepFirst ? el.firstElementChild : null;
     const prevValue = el.value;
     el.innerHTML = '';
     if (currentFirst) el.appendChild(currentFirst);
-    active.forEach((d) => {
+    list.forEach((d) => {
       const opt = document.createElement('option');
       opt.value = d.id;
-      opt.textContent = d.name;
+      opt.textContent = d.name + (d.active === false ? ' (Inactive)' : '');
       el.appendChild(opt);
     });
-    if (prevValue && active.some((d) => String(d.id) === prevValue)) el.value = prevValue;
-  });
+    if (prevValue && list.some((d) => String(d.id) === prevValue)) el.value = prevValue;
+  }
+
+  entryOnlySelects.forEach((id) => fillSelect(id, active, false));
+  reportingSelects.forEach((id) => fillSelect(id, departments, id === 'filterDept' || id === 'rangeDept'));
 
   updateCategoryList();
 }
