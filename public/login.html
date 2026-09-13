@@ -3,29 +3,95 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Visiwani SDA Church - Books</title>
+<title>Visiwani SDA Church — Books</title>
 <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <div class="login-wrap">
-    <div class="login-card">
-      <h1>Visiwani SDA Church</h1>
-      <p class="sub">Church Books - Treasurer Login</p>
-      <div class="error-msg" id="errorMsg"></div>
-      <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" autocomplete="username" required />
-        <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
-        <button type="submit">Log In</button>
-      </form>
+    <div class="login-visual">
+      <div class="crest">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l1.5 3.2L17 6l-2.5 2.4.6 3.4L12 10l-3.1 1.8.6-3.4L7 6l3.5-.8L12 2z"/><path d="M12 10v12M6 22h12M8 15h8M8 18.5h8"/></svg>
+      </div>
+      <h1>Visiwani SDA Church<br/>Books &amp; Records</h1>
+      <p>A paperless home for every department's finances — record transactions the moment they happen and generate polished reports whenever you need them.</p>
+      <div class="feature-list">
+        <div class="feature">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Record income &amp; expenses for any department as they happen</span>
+        </div>
+        <div class="feature">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m6 10V11m6 6V5M3 21h18"/></svg>
+          <span>Quarterly reports generate themselves automatically</span>
+        </div>
+        <div class="feature">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
+          <span>Request any custom date range, just like a bank statement</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-form-side">
+      <div class="login-card">
+        <span class="badge">Treasurer Access</span>
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to record transactions and generate reports.</p>
+
+        <div class="error-banner" id="errorBanner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 8v5M12 16h.01"/></svg>
+          <span id="errorMsg"></span>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="e.g. treasurer" autocomplete="username" autofocus required />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="field-input-wrap">
+              <input type="password" id="password" class="has-icon" placeholder="••••••••" autocomplete="current-password" required />
+              <button type="button" class="field-icon-btn" id="togglePw" tabindex="-1" aria-label="Show password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn" id="loginBtn">
+            <span class="spinner"></span>
+            <span class="btn-label">Log In</span>
+          </button>
+        </form>
+        <p class="footnote">Visiwani SDA Church — internal financial records system</p>
+      </div>
     </div>
   </div>
+
   <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    const form = document.getElementById('loginForm');
+    const errorBanner = document.getElementById('errorBanner');
+    const errorMsg = document.getElementById('errorMsg');
+    const loginBtn = document.getElementById('loginBtn');
+    const togglePw = document.getElementById('togglePw');
+    const passwordInput = document.getElementById('password');
+
+    togglePw.addEventListener('click', () => {
+      const isPw = passwordInput.type === 'password';
+      passwordInput.type = isPw ? 'text' : 'password';
+      togglePw.setAttribute('aria-label', isPw ? 'Hide password' : 'Show password');
+    });
+
+    function showError(message) {
+      errorMsg.textContent = message;
+      errorBanner.classList.add('show');
+    }
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      const errorMsg = document.getElementById('errorMsg');
-      errorMsg.textContent = '';
+      const password = passwordInput.value;
+      errorBanner.classList.remove('show');
+      loginBtn.classList.add('loading');
+      loginBtn.disabled = true;
+
       try {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
@@ -34,12 +100,16 @@
         });
         const data = await res.json();
         if (!res.ok) {
-          errorMsg.textContent = data.error || 'Login failed';
+          showError(data.error || 'Login failed');
+          loginBtn.classList.remove('loading');
+          loginBtn.disabled = false;
           return;
         }
         window.location.href = '/';
       } catch (err) {
-        errorMsg.textContent = 'Could not reach the server. Is it running?';
+        showError('Could not reach the server. Is it running?');
+        loginBtn.classList.remove('loading');
+        loginBtn.disabled = false;
       }
     });
   </script>

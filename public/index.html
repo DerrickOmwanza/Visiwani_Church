@@ -3,259 +3,466 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Visiwani SDA Church - Books</title>
+<title>Visiwani SDA Church — Books</title>
 <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <div class="app-shell">
     <div class="sidebar">
-      <h2>Visiwani SDA Church</h2>
-      <div class="subtitle">Paperless Church Books</div>
-      <div class="nav-item active" data-view="dashboard">Dashboard</div>
-      <div class="nav-item" data-view="transactions">Record Transaction</div>
-      <div class="nav-item" data-view="departments">Departments</div>
-      <div class="nav-item" data-view="reports">Reports</div>
-      <div class="nav-item" data-view="settings">Settings</div>
+      <div class="sidebar-brand">
+        <div class="crest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l1.5 3.2L17 6l-2.5 2.4.6 3.4L12 10l-3.1 1.8.6-3.4L7 6l3.5-.8L12 2z"/><path d="M12 10v12M6 22h12M8 15h8M8 18.5h8"/></svg>
+        </div>
+        <div>
+          <div class="name">Visiwani SDA Church</div>
+          <div class="tag">Paperless Church Books</div>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-item active" data-view="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          <span>Dashboard</span>
+        </div>
+        <div class="nav-item" data-view="transactions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/></svg>
+          <span>Record Transaction</span>
+        </div>
+        <div class="nav-item" data-view="departments">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1"/></svg>
+          <span>Departments</span>
+        </div>
+        <div class="nav-item" data-view="reports">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V9m3 8V5m3 12v-4M4 21h16a1 1 0 001-1V4a1 1 0 00-1-1H4a1 1 0 00-1 1v16a1 1 0 001 1z"/></svg>
+          <span>Reports</span>
+        </div>
+        <div class="nav-item" data-view="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          <span>Settings</span>
+        </div>
+      </div>
+
       <div class="sidebar-footer">
-        <div id="whoami" class="muted" style="margin-bottom:8px;"></div>
-        <button id="logoutBtn">Log Out</button>
+        <div class="user-chip">
+          <div class="avatar" id="avatarInitial">T</div>
+          <div class="who">
+            <div class="name" id="whoName">Loading…</div>
+            <div class="role">Treasurer</div>
+          </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          Log Out
+        </button>
       </div>
     </div>
 
     <div class="main">
       <!-- DASHBOARD -->
       <div class="view active" id="view-dashboard">
-        <h1>Dashboard</h1>
-        <div class="cards-row" id="dashCards"></div>
-        <div class="card">
-          <h3>Recent Transactions</h3>
-          <div id="recentTxns">Loading...</div>
+        <div class="page-header">
+          <h1>Dashboard</h1>
+          <p id="dashDate">Overview of this month's finances</p>
         </div>
-        <div class="card">
-          <h3>Department Balances</h3>
-          <div id="deptBalances">Loading...</div>
+        <div class="page-body">
+          <div class="cards-row" id="dashCards"></div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                  Recent Transactions
+                </h3>
+              </div>
+            </div>
+            <div id="recentTxns" class="table-wrap"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14"/></svg>
+                  Department Balances
+                </h3>
+                <p class="desc">Current balance for every active fund, as of today</p>
+              </div>
+            </div>
+            <div id="deptBalances" class="table-wrap"></div>
+          </div>
         </div>
       </div>
 
       <!-- RECORD TRANSACTION -->
       <div class="view" id="view-transactions">
-        <h1>Record Transaction</h1>
-        <div class="card">
-          <h3>New Entry</h3>
-          <form id="txnForm" class="form-grid">
-            <div class="form-field">
-              <label>Date</label>
-              <input type="date" id="txnDate" required />
-            </div>
-            <div class="form-field">
-              <label>Department / Fund</label>
-              <select id="txnDept" required></select>
-            </div>
-            <div class="form-field">
-              <label>Type</label>
-              <select id="txnDirection" required>
-                <option value="in">Income (Cash In)</option>
-                <option value="out">Expense (Cash Out)</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label>Category</label>
-              <input list="categoryList" id="txnCategory" placeholder="e.g. Tithes" required />
-              <datalist id="categoryList"></datalist>
-            </div>
-            <div class="form-field">
-              <label>Amount (Ksh)</label>
-              <input type="number" id="txnAmount" min="0" step="0.01" required />
-            </div>
-            <div class="form-field" style="grid-column: span 2;">
-              <label>Particulars / Notes</label>
-              <input type="text" id="txnParticulars" placeholder="Optional detail, e.g. payer name or item" />
-            </div>
-            <div class="form-field">
-              <button class="btn" type="submit">Save Transaction</button>
-            </div>
-          </form>
+        <div class="page-header">
+          <h1>Record Transaction</h1>
+          <p>Log income or an expense the moment it happens — no need to remember it later</p>
         </div>
-
-        <div class="card">
-          <h3>Filter Transactions</h3>
-          <div class="form-grid" style="margin-bottom:14px;">
-            <div class="form-field">
-              <label>From</label>
-              <input type="date" id="filterFrom" />
+        <div class="page-body">
+          <div class="card">
+            <div class="card-head">
+              <div><h3>New Entry</h3></div>
             </div>
-            <div class="form-field">
-              <label>To</label>
-              <input type="date" id="filterTo" />
-            </div>
-            <div class="form-field">
-              <label>Department</label>
-              <select id="filterDept"><option value="">All Departments</option></select>
-            </div>
-            <div class="form-field">
-              <button class="btn secondary" id="filterBtn" type="button">Apply Filter</button>
-            </div>
+            <form id="txnForm" class="form-grid">
+              <div class="form-field">
+                <label>Date</label>
+                <input type="date" id="txnDate" required />
+              </div>
+              <div class="form-field">
+                <label>Department / Fund</label>
+                <select id="txnDept" required></select>
+              </div>
+              <div class="form-field">
+                <label>Type</label>
+                <select id="txnDirection" required>
+                  <option value="in">Income (Cash In)</option>
+                  <option value="out">Expense (Cash Out)</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Category</label>
+                <input list="categoryList" id="txnCategory" placeholder="e.g. Tithes" required />
+                <datalist id="categoryList"></datalist>
+              </div>
+              <div class="form-field">
+                <label>Amount (Ksh)</label>
+                <input type="number" id="txnAmount" min="0" step="0.01" placeholder="0.00" required />
+              </div>
+              <div class="form-field" style="grid-column: span 2;">
+                <label>Particulars / Notes</label>
+                <input type="text" id="txnParticulars" placeholder="Optional detail, e.g. payer name or item" />
+              </div>
+              <div class="form-field">
+                <button class="btn" type="submit" id="txnSubmitBtn">
+                  <span class="spinner"></span>
+                  <span class="btn-label">Save Transaction</span>
+                </button>
+              </div>
+            </form>
           </div>
-          <div id="txnTable">Loading...</div>
+
+          <div class="card">
+            <div class="card-head">
+              <div><h3>Transaction History</h3></div>
+            </div>
+            <div class="form-grid" style="margin-bottom:16px;">
+              <div class="form-field">
+                <label>From</label>
+                <input type="date" id="filterFrom" />
+              </div>
+              <div class="form-field">
+                <label>To</label>
+                <input type="date" id="filterTo" />
+              </div>
+              <div class="form-field">
+                <label>Department</label>
+                <select id="filterDept"><option value="">All Departments</option></select>
+              </div>
+              <div class="form-field">
+                <button class="btn secondary" id="filterBtn" type="button">Apply Filter</button>
+              </div>
+            </div>
+            <div id="txnTable" class="table-wrap"></div>
+          </div>
         </div>
       </div>
 
       <!-- DEPARTMENTS -->
       <div class="view" id="view-departments">
-        <h1>Departments / Funds</h1>
-        <div class="card">
-          <h3>Add Department</h3>
-          <form id="deptForm" class="form-grid">
-            <div class="form-field">
-              <label>Name</label>
-              <input type="text" id="deptName" required />
-            </div>
-            <div class="form-field">
-              <label>Opening Balance (Ksh)</label>
-              <input type="number" id="deptOpeningBalance" step="0.01" value="0" />
-            </div>
-            <div class="form-field">
-              <label>Opening Date</label>
-              <input type="date" id="deptOpeningDate" />
-            </div>
-            <div class="form-field">
-              <button class="btn" type="submit">Add Department</button>
-            </div>
-          </form>
+        <div class="page-header">
+          <h1>Departments &amp; Funds</h1>
+          <p>Manage funds, opening balances, and catch up records from before you started using the system</p>
         </div>
-        <div class="card">
-          <h3>Existing Departments</h3>
-          <div id="deptTable">Loading...</div>
+        <div class="page-body">
+          <div class="card">
+            <div class="card-head">
+              <div><h3>Add Department</h3></div>
+            </div>
+            <form id="deptForm" class="form-grid">
+              <div class="form-field">
+                <label>Name</label>
+                <input type="text" id="deptName" placeholder="e.g. Prayer Ministry" required />
+              </div>
+              <div class="form-field">
+                <label>Opening Balance (Ksh)</label>
+                <input type="number" id="deptOpeningBalance" step="0.01" value="0" />
+              </div>
+              <div class="form-field">
+                <label>Opening Date</label>
+                <input type="date" id="deptOpeningDate" />
+              </div>
+              <div class="form-field">
+                <button class="btn" type="submit">
+                  <span class="spinner"></span>
+                  <span class="btn-label">Add Department</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div><h3>Existing Departments</h3></div>
+            </div>
+            <div id="deptTable" class="table-wrap"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Catch Up a Past Period
+                </h3>
+                <p class="desc">Already have quarters recorded on paper for this year? Enter the totals here in one go instead of retyping every line — the amount is added as a single dated entry so balances and reports stay correct going forward.</p>
+              </div>
+            </div>
+            <form id="catchupForm" class="form-grid">
+              <div class="form-field">
+                <label>Department</label>
+                <select id="catchupDept" required></select>
+              </div>
+              <div class="form-field">
+                <label>Period Covered</label>
+                <input type="text" id="catchupLabel" placeholder="e.g. Q1 2026" required />
+              </div>
+              <div class="form-field">
+                <label>Entry Date</label>
+                <input type="date" id="catchupDate" required />
+                <div class="hint">Usually the last day of the period being caught up</div>
+              </div>
+              <div class="form-field">
+                <label>Total Income (Ksh)</label>
+                <input type="number" id="catchupIncome" min="0" step="0.01" value="0" />
+              </div>
+              <div class="form-field">
+                <label>Total Expenses (Ksh)</label>
+                <input type="number" id="catchupExpense" min="0" step="0.01" value="0" />
+              </div>
+              <div class="form-field">
+                <button class="btn secondary" type="submit" id="catchupBtn">
+                  <span class="spinner"></span>
+                  <span class="btn-label">Record Period Totals</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
 
       <!-- REPORTS -->
       <div class="view" id="view-reports">
-        <h1>Reports</h1>
-
-        <div class="card">
-          <h3>Monthly Statement of Activity</h3>
-          <p class="muted">Weekly income &amp; expense breakdown for one department, in the church's usual format.</p>
-          <div class="form-grid">
-            <div class="form-field">
-              <label>Department</label>
-              <select id="monthlyDept"></select>
-            </div>
-            <div class="form-field">
-              <label>Month</label>
-              <select id="monthlyMonth"></select>
-            </div>
-            <div class="form-field">
-              <label>Year</label>
-              <input type="number" id="monthlyYear" />
-            </div>
-            <div class="form-field">
-              <button class="btn" id="monthlyBtn" type="button">Download Excel</button>
-            </div>
-          </div>
+        <div class="page-header">
+          <h1>Reports</h1>
+          <p>Generate a polished Excel report for any department, month, quarter, year, or custom date range</p>
         </div>
-
-        <div class="card">
-          <h3>Quarterly Departmental Summary</h3>
-          <p class="muted">Income, expense and net movement per quarter, across every department, for one year.</p>
-          <div class="form-grid">
-            <div class="form-field">
-              <label>Year</label>
-              <input type="number" id="quarterlyYear" />
+        <div class="page-body">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path stroke-linecap="round" d="M3 9h18M8 3v3M16 3v3"/></svg>
+                  Monthly Statement of Activity
+                </h3>
+                <p class="desc">Weekly income &amp; expense breakdown for one department, in the church's usual format</p>
+              </div>
             </div>
-            <div class="form-field">
-              <button class="btn" id="quarterlyBtn" type="button">Download Excel</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Annual Collection Summary</h3>
-          <p class="muted">All 12 months side by side for one department, with a running total column.</p>
-          <div class="form-grid">
-            <div class="form-field">
-              <label>Department</label>
-              <select id="annualDept"></select>
-            </div>
-            <div class="form-field">
-              <label>Year</label>
-              <input type="number" id="annualYear" />
-            </div>
-            <div class="form-field">
-              <button class="btn" id="annualBtn" type="button">Download Excel</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Custom Date Range Statement</h3>
-          <p class="muted">Just like a bank statement - pick any "from" and "to" date, for one department or all of them.</p>
-          <div class="form-grid">
-            <div class="form-field">
-              <label>From</label>
-              <input type="date" id="rangeFrom" />
-            </div>
-            <div class="form-field">
-              <label>To</label>
-              <input type="date" id="rangeTo" />
-            </div>
-            <div class="form-field">
-              <label>Department</label>
-              <select id="rangeDept"><option value="">All Departments</option></select>
-            </div>
-            <div class="form-field">
-              <button class="btn" id="rangeBtn" type="button">Download Excel</button>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Department</label>
+                <select id="monthlyDept"></select>
+              </div>
+              <div class="form-field">
+                <label>Month</label>
+                <select id="monthlyMonth"></select>
+              </div>
+              <div class="form-field">
+                <label>Year</label>
+                <input type="number" id="monthlyYear" />
+              </div>
+              <div class="form-field">
+                <button class="btn" id="monthlyBtn" type="button">
+                  <span class="spinner"></span>
+                  <span class="btn-label">Download Excel</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="card">
-          <h3>Auto-Generated Quarterly Reports</h3>
-          <p class="muted">A report is generated automatically the day each quarter ends. You can also generate one manually below.</p>
-          <div class="form-grid" style="margin-bottom:14px;">
-            <div class="form-field">
-              <label>Year</label>
-              <input type="number" id="genYear" />
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V9m3 8V5m3 12v-4"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
+                  Quarterly Departmental Summary
+                </h3>
+                <p class="desc">Income, expense and net movement per quarter, across every department, for one year</p>
+              </div>
             </div>
-            <div class="form-field">
-              <label>Quarter</label>
-              <select id="genQuarter">
-                <option value="1">Q1 (Jan-Mar)</option>
-                <option value="2">Q2 (Apr-Jun)</option>
-                <option value="3">Q3 (Jul-Sep)</option>
-                <option value="4">Q4 (Oct-Dec)</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <button class="btn secondary" id="genBtn" type="button">Generate Now</button>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Year</label>
+                <input type="number" id="quarterlyYear" />
+              </div>
+              <div class="form-field">
+                <button class="btn" id="quarterlyBtn" type="button">
+                  <span class="spinner"></span>
+                  <span class="btn-label">Download Excel</span>
+                </button>
+              </div>
             </div>
           </div>
-          <div id="generatedTable">Loading...</div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  Annual Collection Summary
+                </h3>
+                <p class="desc">All 12 months side by side for one department, with a running total column</p>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Department</label>
+                <select id="annualDept"></select>
+              </div>
+              <div class="form-field">
+                <label>Year</label>
+                <input type="number" id="annualYear" />
+              </div>
+              <div class="form-field">
+                <button class="btn" id="annualBtn" type="button">
+                  <span class="spinner"></span>
+                  <span class="btn-label">Download Excel</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                  Custom Date Range Statement
+                </h3>
+                <p class="desc">Just like a bank statement — pick any "from" and "to" date, for one department or all of them</p>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>From</label>
+                <input type="date" id="rangeFrom" />
+              </div>
+              <div class="form-field">
+                <label>To</label>
+                <input type="date" id="rangeTo" />
+              </div>
+              <div class="form-field">
+                <label>Department</label>
+                <select id="rangeDept"><option value="">All Departments</option></select>
+              </div>
+              <div class="form-field">
+                <button class="btn" id="rangeBtn" type="button">
+                  <span class="spinner"></span>
+                  <span class="btn-label">Download Excel</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3"/></svg>
+                  Auto-Generated Quarterly Reports
+                </h3>
+                <p class="desc">A report is generated automatically the day each quarter ends. You can also generate one manually below.</p>
+              </div>
+            </div>
+            <div class="form-grid" style="margin-bottom:16px;">
+              <div class="form-field">
+                <label>Year</label>
+                <input type="number" id="genYear" />
+              </div>
+              <div class="form-field">
+                <label>Quarter</label>
+                <select id="genQuarter">
+                  <option value="1">Q1 (Jan–Mar)</option>
+                  <option value="2">Q2 (Apr–Jun)</option>
+                  <option value="3">Q3 (Jul–Sep)</option>
+                  <option value="4">Q4 (Oct–Dec)</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <button class="btn secondary" id="genBtn" type="button">
+                  <span class="spinner"></span>
+                  <span class="btn-label">Generate Now</span>
+                </button>
+              </div>
+            </div>
+            <div id="generatedTable" class="table-wrap"></div>
+          </div>
         </div>
       </div>
 
       <!-- SETTINGS -->
       <div class="view" id="view-settings">
-        <h1>Settings</h1>
-        <div class="card">
-          <h3>Change Password</h3>
-          <form id="pwForm" class="form-grid">
-            <div class="form-field">
-              <label>Current Password</label>
-              <input type="password" id="curPw" required />
+        <div class="page-header">
+          <h1>Settings</h1>
+          <p>Manage your login</p>
+        </div>
+        <div class="page-body">
+          <div class="card" style="max-width: 480px;">
+            <div class="card-head">
+              <div><h3>Change Password</h3></div>
             </div>
-            <div class="form-field">
-              <label>New Password</label>
-              <input type="password" id="newPw" required minlength="6" />
-            </div>
-            <div class="form-field">
-              <button class="btn" type="submit">Update Password</button>
-            </div>
-          </form>
+            <form id="pwForm" class="form-grid" style="grid-template-columns: 1fr;">
+              <div class="form-field">
+                <label>Current Password</label>
+                <input type="password" id="curPw" required />
+              </div>
+              <div class="form-field">
+                <label>New Password</label>
+                <input type="password" id="newPw" required minlength="6" />
+                <div class="hint">At least 6 characters</div>
+              </div>
+              <div class="form-field">
+                <button class="btn" type="submit" id="pwSubmitBtn">
+                  <span class="spinner"></span>
+                  <span class="btn-label">Update Password</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Reusable modal -->
+  <div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal" id="modalBox" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <div>
+          <h3 id="modalTitle"></h3>
+          <p id="modalSubtitle" hidden></p>
+        </div>
+        <button class="modal-close" id="modalCloseBtn" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter"></div>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toastStack"></div>
 
   <script src="/js/app.js"></script>
 </body>
