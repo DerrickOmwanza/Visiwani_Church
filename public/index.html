@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Visiwani SDA Church - Books</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar">
+      <h2>Visiwani SDA Church</h2>
+      <div class="subtitle">Paperless Church Books</div>
+      <div class="nav-item active" data-view="dashboard">Dashboard</div>
+      <div class="nav-item" data-view="transactions">Record Transaction</div>
+      <div class="nav-item" data-view="departments">Departments</div>
+      <div class="nav-item" data-view="reports">Reports</div>
+      <div class="nav-item" data-view="settings">Settings</div>
+      <div class="sidebar-footer">
+        <div id="whoami" class="muted" style="margin-bottom:8px;"></div>
+        <button id="logoutBtn">Log Out</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- DASHBOARD -->
+      <div class="view active" id="view-dashboard">
+        <h1>Dashboard</h1>
+        <div class="cards-row" id="dashCards"></div>
+        <div class="card">
+          <h3>Recent Transactions</h3>
+          <div id="recentTxns">Loading...</div>
+        </div>
+        <div class="card">
+          <h3>Department Balances</h3>
+          <div id="deptBalances">Loading...</div>
+        </div>
+      </div>
+
+      <!-- RECORD TRANSACTION -->
+      <div class="view" id="view-transactions">
+        <h1>Record Transaction</h1>
+        <div class="card">
+          <h3>New Entry</h3>
+          <form id="txnForm" class="form-grid">
+            <div class="form-field">
+              <label>Date</label>
+              <input type="date" id="txnDate" required />
+            </div>
+            <div class="form-field">
+              <label>Department / Fund</label>
+              <select id="txnDept" required></select>
+            </div>
+            <div class="form-field">
+              <label>Type</label>
+              <select id="txnDirection" required>
+                <option value="in">Income (Cash In)</option>
+                <option value="out">Expense (Cash Out)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Category</label>
+              <input list="categoryList" id="txnCategory" placeholder="e.g. Tithes" required />
+              <datalist id="categoryList"></datalist>
+            </div>
+            <div class="form-field">
+              <label>Amount (Ksh)</label>
+              <input type="number" id="txnAmount" min="0" step="0.01" required />
+            </div>
+            <div class="form-field" style="grid-column: span 2;">
+              <label>Particulars / Notes</label>
+              <input type="text" id="txnParticulars" placeholder="Optional detail, e.g. payer name or item" />
+            </div>
+            <div class="form-field">
+              <button class="btn" type="submit">Save Transaction</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Filter Transactions</h3>
+          <div class="form-grid" style="margin-bottom:14px;">
+            <div class="form-field">
+              <label>From</label>
+              <input type="date" id="filterFrom" />
+            </div>
+            <div class="form-field">
+              <label>To</label>
+              <input type="date" id="filterTo" />
+            </div>
+            <div class="form-field">
+              <label>Department</label>
+              <select id="filterDept"><option value="">All Departments</option></select>
+            </div>
+            <div class="form-field">
+              <button class="btn secondary" id="filterBtn" type="button">Apply Filter</button>
+            </div>
+          </div>
+          <div id="txnTable">Loading...</div>
+        </div>
+      </div>
+
+      <!-- DEPARTMENTS -->
+      <div class="view" id="view-departments">
+        <h1>Departments / Funds</h1>
+        <div class="card">
+          <h3>Add Department</h3>
+          <form id="deptForm" class="form-grid">
+            <div class="form-field">
+              <label>Name</label>
+              <input type="text" id="deptName" required />
+            </div>
+            <div class="form-field">
+              <label>Opening Balance (Ksh)</label>
+              <input type="number" id="deptOpeningBalance" step="0.01" value="0" />
+            </div>
+            <div class="form-field">
+              <label>Opening Date</label>
+              <input type="date" id="deptOpeningDate" />
+            </div>
+            <div class="form-field">
+              <button class="btn" type="submit">Add Department</button>
+            </div>
+          </form>
+        </div>
+        <div class="card">
+          <h3>Existing Departments</h3>
+          <div id="deptTable">Loading...</div>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="view" id="view-reports">
+        <h1>Reports</h1>
+
+        <div class="card">
+          <h3>Monthly Statement of Activity</h3>
+          <p class="muted">Weekly income &amp; expense breakdown for one department, in the church's usual format.</p>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Department</label>
+              <select id="monthlyDept"></select>
+            </div>
+            <div class="form-field">
+              <label>Month</label>
+              <select id="monthlyMonth"></select>
+            </div>
+            <div class="form-field">
+              <label>Year</label>
+              <input type="number" id="monthlyYear" />
+            </div>
+            <div class="form-field">
+              <button class="btn" id="monthlyBtn" type="button">Download Excel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Quarterly Departmental Summary</h3>
+          <p class="muted">Income, expense and net movement per quarter, across every department, for one year.</p>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Year</label>
+              <input type="number" id="quarterlyYear" />
+            </div>
+            <div class="form-field">
+              <button class="btn" id="quarterlyBtn" type="button">Download Excel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Annual Collection Summary</h3>
+          <p class="muted">All 12 months side by side for one department, with a running total column.</p>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Department</label>
+              <select id="annualDept"></select>
+            </div>
+            <div class="form-field">
+              <label>Year</label>
+              <input type="number" id="annualYear" />
+            </div>
+            <div class="form-field">
+              <button class="btn" id="annualBtn" type="button">Download Excel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Custom Date Range Statement</h3>
+          <p class="muted">Just like a bank statement - pick any "from" and "to" date, for one department or all of them.</p>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>From</label>
+              <input type="date" id="rangeFrom" />
+            </div>
+            <div class="form-field">
+              <label>To</label>
+              <input type="date" id="rangeTo" />
+            </div>
+            <div class="form-field">
+              <label>Department</label>
+              <select id="rangeDept"><option value="">All Departments</option></select>
+            </div>
+            <div class="form-field">
+              <button class="btn" id="rangeBtn" type="button">Download Excel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Auto-Generated Quarterly Reports</h3>
+          <p class="muted">A report is generated automatically the day each quarter ends. You can also generate one manually below.</p>
+          <div class="form-grid" style="margin-bottom:14px;">
+            <div class="form-field">
+              <label>Year</label>
+              <input type="number" id="genYear" />
+            </div>
+            <div class="form-field">
+              <label>Quarter</label>
+              <select id="genQuarter">
+                <option value="1">Q1 (Jan-Mar)</option>
+                <option value="2">Q2 (Apr-Jun)</option>
+                <option value="3">Q3 (Jul-Sep)</option>
+                <option value="4">Q4 (Oct-Dec)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <button class="btn secondary" id="genBtn" type="button">Generate Now</button>
+            </div>
+          </div>
+          <div id="generatedTable">Loading...</div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="view" id="view-settings">
+        <h1>Settings</h1>
+        <div class="card">
+          <h3>Change Password</h3>
+          <form id="pwForm" class="form-grid">
+            <div class="form-field">
+              <label>Current Password</label>
+              <input type="password" id="curPw" required />
+            </div>
+            <div class="form-field">
+              <label>New Password</label>
+              <input type="password" id="newPw" required minlength="6" />
+            </div>
+            <div class="form-field">
+              <button class="btn" type="submit">Update Password</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

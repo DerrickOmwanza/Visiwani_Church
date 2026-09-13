@@ -1,0 +1,19 @@
+{
+  "name": "visiwani-church-books",
+  "version": "1.0.0",
+  "description": "Paperless bookkeeping system for Visiwani SDA Church - record department transactions and generate Excel financial reports on demand.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "seed": "node server/seed.js"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "exceljs": "^4.4.0",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "node-cron": "^3.0.3"
+  }
+}
