@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Seventh-day Adventist Church logo">
+  <defs>
+    <linearGradient id="flameGoldLight" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#F5CA6E"/>
+      <stop offset="1" stop-color="#D6912E"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M114,10
+    C88,46 66,80 72,116
+    C75,136 90,146 87,178
+    L98,178
+    C106,150 114,130 106,104
+    C100,84 122,52 114,10 Z"
+    fill="url(#flameGoldLight)"/>
+  <path d="M100,20 C78,58 62,86 70,118 C73,132 84,142 82,164"
+    fill="none" stroke="#0b2818" stroke-width="5" stroke-linecap="round" opacity="0.55"/>
+  <path d="M108,26 C122,56 104,80 106,104 C107,120 116,136 100,176"
+    fill="none" stroke="#0b2818" stroke-width="5" stroke-linecap="round" opacity="0.55"/>
+
+  <path d="M156,68
+    C136,92 124,114 130,140
+    C133,154 145,160 142,180
+    L151,180
+    C158,160 165,148 159,132
+    C154,116 168,96 156,68 Z"
+    fill="url(#flameGoldLight)"/>
+  <path d="M147,78 C132,100 124,118 130,142 C132,152 140,160 138,176"
+    fill="none" stroke="#0b2818" stroke-width="4.5" stroke-linecap="round" opacity="0.55"/>
+
+  <path d="M8,176
+    C46,150 88,146 116,172
+    L116,206
+    C90,182 46,184 8,202 Z"
+    fill="#F4F7F5"/>
+  <path d="M232,176
+    C194,150 158,148 132,174
+    L132,206
+    C156,184 196,184 232,202 Z"
+    fill="#F4F7F5"/>
+</svg>

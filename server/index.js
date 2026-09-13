@@ -42,10 +42,12 @@ app.use('/api/departments', requireLogin, departmentRoutes);
 app.use('/api/transactions', requireLogin, transactionRoutes);
 app.use('/api/reports', requireLogin, reportRoutes);
 
-// Static assets (css/js) are always servable; login.html always servable;
-// everything else behind the login gate.
+// Static assets (css/js/img) are always servable - the login page itself
+// needs its stylesheet, script, and logo before a session exists; login.html
+// is always servable too. Everything else sits behind the login gate.
 app.use('/css', express.static(path.join(__dirname, '..', 'public', 'css')));
 app.use('/js', express.static(path.join(__dirname, '..', 'public', 'js')));
+app.use('/img', express.static(path.join(__dirname, '..', 'public', 'img')));
 app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'login.html')));
 app.use(requireLogin, express.static(path.join(__dirname, '..', 'public')));
 app.get('*', requireLogin, (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'index.html')));
