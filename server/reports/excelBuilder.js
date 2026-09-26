@@ -16,6 +16,20 @@ function sheetName(name) {
   return name.replace(/[*?:\\/[\]]/g, '-').slice(0, 31);
 }
 
+function compactMoney(n) {
+  return Number(n).toLocaleString('en-KE', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+// A transaction built from line items (e.g. "3 bags cement" + "2 fundis,
+// 1 day") should show that breakdown wherever its particulars are
+// printed - this is the whole point of itemizing: so a printed statement
+// still shows what a total was actually made of, not just the number.
+function describeParticulars(t) {
+  if (!t.items || !t.items.length) return t.particulars || t.category;
+  const breakdown = t.items.map((i) => `${i.quantity} x ${i.description} @ ${compactMoney(i.unitPrice)} = ${compactMoney(i.lineTotal)}`).join('; ');
+  return t.particulars ? `${t.particulars} — ${breakdown}` : breakdown;
+}
+
 function titleBlock(ws, lines, lastCol) {
   ws.mergeCells(1, 1, 1, lastCol);
   const title = ws.getCell(1, 1);
@@ -49,7 +63,7 @@ function sectionHeaderRow(ws, row, values) {
   return row + 1;
 }
 
-function dataRow(ws, row, values, { moneyCols = [], bold = false } = {}) {
+function dataRow(ws, row, values, { moneyCols = [], bold = false, wrapCols = [] } = {}) {
   const r = ws.getRow(row);
   values.forEach((v, i) => {
     const cell = r.getCell(i + 1);
@@ -59,6 +73,9 @@ function dataRow(ws, row, values, { moneyCols = [], bold = false } = {}) {
     if (moneyCols.includes(i)) {
       cell.numFmt = CURRENCY_FMT;
       cell.alignment = { horizontal: 'right' };
+    }
+    if (wrapCols.includes(i)) {
+      cell.alignment = { ...cell.alignment, wrapText: true, vertical: 'top' };
     }
   });
   return row + 1;
@@ -367,10 +384,11 @@ function buildRangeStatement({ department, departments, transactions, from, to }
     else totalOut += t.amount;
 
     const rowValues = single
-      ? [t.date, t.particulars || t.category, t.category, cashIn, cashOut, running]
-      : [t.date, deptName(t.departmentId), t.particulars || t.category, t.category, cashIn, cashOut];
+      ? [t.date, describeParticulars(t), t.category, cashIn, cashOut, running]
+      : [t.date, deptName(t.departmentId), describeParticulars(t), t.category, cashIn, cashOut];
     const moneyCols = single ? [3, 4, 5] : [4, 5];
-    row = dataRow(ws, row, rowValues, { moneyCols });
+    const wrapCols = single ? [1] : [2];
+    row = dataRow(ws, row, rowValues, { moneyCols, wrapCols });
   }
 
   row += 1;
@@ -416,7 +434,7 @@ function buildDepartmentLedger({ department, transactions, from, to }) {
     running += t.direction === 'in' ? t.amount : -t.amount;
     if (t.direction === 'in') totalIn += t.amount;
     else totalOut += t.amount;
-    row = dataRow(ws, row, [t.date, t.particulars || t.category, cashIn, cashOut, running], { moneyCols: [2, 3, 4] });
+    row = dataRow(ws, row, [t.date, describeParticulars(t), cashIn, cashOut, running], { moneyCols: [2, 3, 4], wrapCols: [1] });
   }
 
   row = totalRow(ws, row, ['', 'TOTALS / BALANCE C/D', totalIn, totalOut, running], [2, 3, 4]);

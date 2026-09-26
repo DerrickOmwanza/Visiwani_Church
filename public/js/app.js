@@ -187,6 +187,96 @@ function getChipValues(id) {
   return Array.from(document.getElementById(id).querySelectorAll('.chip')).map((c) => c.dataset.value);
 }
 
+/* ---------------- Itemized amount breakdown ----------------
+   Lets a transaction (e.g. a building expense) be built from named line
+   items - description, quantity, unit price - instead of one lump sum,
+   so months later the treasurer can see exactly what made up the total
+   (materials bought, fundis paid) instead of just a number with no trail. */
+function itemRowHtml(item) {
+  const d = item || {};
+  return `
+    <div class="item-row" data-item-row>
+      <input type="text" placeholder="e.g. Cement bags, Fundi labour" data-item-desc value="${esc(d.description || '')}" />
+      <input type="number" min="0" step="0.01" placeholder="Qty" data-item-qty value="${d.quantity ?? ''}" />
+      <input type="number" min="0" step="0.01" placeholder="Price" data-item-price value="${d.unitPrice ?? ''}" />
+      <span class="item-line-total" data-item-line-total>${fmtMoney((Number(d.quantity) || 0) * (Number(d.unitPrice) || 0))}</span>
+      <button type="button" class="icon-btn danger" data-remove-item title="Remove item">${ICONS.trash}</button>
+    </div>`;
+}
+
+function renderItemEditorHtml(prefix, items) {
+  const rows = (items && items.length ? items : [{}]).map(itemRowHtml).join('');
+  return `
+    <div class="item-editor" id="${prefix}Items">
+      <div class="item-editor-header"><span>Description</span><span>Qty</span><span>Unit Price</span><span>Line Total</span><span></span></div>
+      <div id="${prefix}ItemRows">${rows}</div>
+      <div class="item-editor-footer">
+        <button type="button" class="btn secondary small" data-add-item>+ Add Item</button>
+        <div class="item-editor-total">Items Total: <strong id="${prefix}ItemsTotalDisplay">Ksh 0.00</strong></div>
+      </div>
+    </div>`;
+}
+
+function computeItemsTotal(prefix) {
+  let total = 0;
+  document.querySelectorAll(`#${prefix}ItemRows [data-item-row]`).forEach((row) => {
+    const qty = Number(row.querySelector('[data-item-qty]').value) || 0;
+    const price = Number(row.querySelector('[data-item-price]').value) || 0;
+    const lineTotal = qty * price;
+    row.querySelector('[data-item-line-total]').textContent = fmtMoney(lineTotal);
+    total += lineTotal;
+  });
+  const totalDisplay = document.getElementById(`${prefix}ItemsTotalDisplay`);
+  if (totalDisplay) totalDisplay.textContent = fmtMoney(total);
+  return total;
+}
+
+function wireItemEditor(prefix, onTotalChange) {
+  const container = document.getElementById(`${prefix}Items`);
+  const rowsWrap = document.getElementById(`${prefix}ItemRows`);
+
+  const recalc = () => onTotalChange(computeItemsTotal(prefix));
+
+  container.querySelector('[data-add-item]').addEventListener('click', () => {
+    rowsWrap.insertAdjacentHTML('beforeend', itemRowHtml());
+    recalc();
+  });
+
+  rowsWrap.addEventListener('input', (e) => {
+    if (e.target.matches('[data-item-qty], [data-item-price]')) recalc();
+  });
+
+  rowsWrap.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-remove-item]');
+    if (!btn) return;
+    const rows = rowsWrap.querySelectorAll('[data-item-row]');
+    if (rows.length <= 1) {
+      // Keep one row always present - clearing its fields is how you back
+      // out of itemizing, rather than the editor vanishing entirely.
+      btn.closest('[data-item-row]').querySelectorAll('input').forEach((i) => (i.value = ''));
+    } else {
+      btn.closest('[data-item-row]').remove();
+    }
+    recalc();
+  });
+
+  recalc();
+}
+
+// Only rows with a description AND a positive quantity count as real items -
+// an empty trailing row (always present so there's somewhere to type) is
+// silently ignored rather than rejected.
+function getItemPayload(prefix) {
+  const items = [];
+  document.querySelectorAll(`#${prefix}ItemRows [data-item-row]`).forEach((row) => {
+    const description = row.querySelector('[data-item-desc]').value.trim();
+    const quantity = Number(row.querySelector('[data-item-qty]').value);
+    const unitPrice = Number(row.querySelector('[data-item-price]').value);
+    if (description && quantity > 0 && unitPrice >= 0) items.push({ description, quantity, unitPrice });
+  });
+  return items;
+}
+
 /* ---------------- Navigation ---------------- */
 function setupNav() {
   document.querySelectorAll('.nav-item').forEach((item) => {
@@ -309,7 +399,9 @@ async function loadDashboard() {
   `;
 
   const recent = [...allTxns].sort((a, b) => (a.date === b.date ? b.id - a.id : a.date < b.date ? 1 : -1)).slice(0, 10);
-  document.getElementById('recentTxns').innerHTML = renderTxnTable(recent, false);
+  const recentContainer = document.getElementById('recentTxns');
+  recentContainer.innerHTML = renderTxnTable(recent, false);
+  wireViewItemsButtons(recentContainer, recent);
 
   await loadDepartmentOptions();
   const balanceRows = departments
@@ -339,24 +431,58 @@ function computeBalance(dept, allTxns, asOfDate) {
 function renderTxnTable(list, showActions = true) {
   if (!list.length) return emptyState('No transactions found.');
   const rows = list
-    .map(
-      (t) => `
+    .map((t) => {
+      const itemsBadge =
+        t.items && t.items.length
+          ? `<button type="button" class="badge items-badge" title="See how this total was made up" data-view-items="${t.id}">${ICONS.list} ${t.items.length} item${t.items.length > 1 ? 's' : ''}</button>`
+          : '';
+      return `
     <tr>
       <td>${t.date}</td>
       <td>${esc(t.departmentName)}</td>
       <td>${esc(t.category)}</td>
-      <td class="wrap">${esc(t.particulars || '')}</td>
+      <td class="wrap">${esc(t.particulars || '')}${itemsBadge}</td>
       <td class="${t.direction === 'in' ? 'amount-in' : ''}">${t.direction === 'in' ? fmtMoney(t.amount) : ''}</td>
       <td class="${t.direction === 'out' ? 'amount-out' : ''}">${t.direction === 'out' ? fmtMoney(t.amount) : ''}</td>
       ${showActions ? `<td><div class="row-actions"><button class="icon-btn" title="Edit" data-edit-txn="${t.id}">${ICONS.edit}</button><button class="icon-btn danger" title="Delete" data-del="${t.id}">${ICONS.trash}</button></div></td>` : ''}
-    </tr>`
-    )
+    </tr>`;
+    })
     .join('');
   return `
     <table>
       <thead><tr><th>Date</th><th>Department</th><th>Category</th><th>Particulars</th><th>Cash In</th><th>Cash Out</th>${showActions ? '<th></th>' : ''}</tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
+}
+
+function openViewItemsModal(txn) {
+  const rows = txn.items
+    .map(
+      (it) => `
+    <tr>
+      <td class="wrap">${esc(it.description)}</td>
+      <td style="text-align:right;">${it.quantity}</td>
+      <td style="text-align:right;">${fmtMoney(it.unitPrice)}</td>
+      <td style="text-align:right; font-weight:600;">${fmtMoney(it.lineTotal)}</td>
+    </tr>`
+    )
+    .join('');
+
+  openModal({
+    title: 'Itemized Breakdown',
+    subtitle: `${txn.date} · ${esc(txn.departmentName)} · ${esc(txn.category)}`,
+    bodyHtml: `
+      <table>
+        <thead><tr><th>Description</th><th style="text-align:right;">Qty</th><th style="text-align:right;">Unit Price</th><th style="text-align:right;">Line Total</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="text-align:right; margin-top:14px; font-size:15px;">
+        <strong>Total: ${fmtMoney(txn.amount)}</strong>
+      </div>
+      ${txn.particulars ? `<p class="muted" style="margin-top:12px;">Note: ${esc(txn.particulars)}</p>` : ''}`,
+    footerHtml: `<button class="btn secondary" id="viewItemsClose">Close</button>`,
+    onOpen: () => document.getElementById('viewItemsClose').addEventListener('click', closeModal),
+  });
 }
 
 /* ---------------- Transactions ---------------- */
@@ -392,6 +518,16 @@ async function refreshTxnTable() {
     btn.addEventListener('click', () => {
       const txn = list.find((t) => t.id === Number(btn.dataset.editTxn));
       if (txn) openEditTransactionModal(txn);
+    });
+  });
+  wireViewItemsButtons(container, list);
+}
+
+function wireViewItemsButtons(container, list) {
+  container.querySelectorAll('[data-view-items]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const txn = list.find((t) => t.id === Number(btn.dataset.viewItems));
+      if (txn) openViewItemsModal(txn);
     });
   });
 }
@@ -433,12 +569,14 @@ function openEditTransactionModal(txn) {
           </div>
           <div class="form-field">
             <label>Amount (Ksh)</label>
-            <input type="number" id="editTxnAmount" min="0" step="0.01" value="${txn.amount}" required />
+            <input type="number" id="editTxnAmount" min="0" step="0.01" value="${txn.amount}" ${txn.items && txn.items.length ? 'readonly' : ''} required />
+            <button type="button" class="item-breakdown-toggle" id="editTxnItemToggle"></button>
           </div>
           <div class="form-field" style="grid-column: span 2;">
             <label>Particulars / Notes</label>
             <input type="text" id="editTxnParticulars" value="${esc(txn.particulars || '')}" />
           </div>
+          <div id="editTxnItemEditorWrap" class="item-editor-wrap" ${txn.items && txn.items.length ? '' : 'hidden'}>${txn.items && txn.items.length ? renderItemEditorHtml('editTxn', txn.items) : ''}</div>
         </div>
       </form>`,
     footerHtml: `
@@ -447,6 +585,30 @@ function openEditTransactionModal(txn) {
         <span class="spinner"></span><span class="btn-label">Save Changes</span>
       </button>`,
     onOpen: () => {
+      let editItemized = !!(txn.items && txn.items.length);
+
+      function setEditItemized(on) {
+        editItemized = on;
+        const wrap = document.getElementById('editTxnItemEditorWrap');
+        const amountInput = document.getElementById('editTxnAmount');
+        const toggleBtn = document.getElementById('editTxnItemToggle');
+        if (on) {
+          wrap.hidden = false;
+          if (!wrap.innerHTML) wrap.innerHTML = renderItemEditorHtml('editTxn', null);
+          wireItemEditor('editTxn', (total) => { amountInput.value = total ? total.toFixed(2) : ''; });
+          amountInput.readOnly = true;
+          toggleBtn.innerHTML = `${ICONS.trash} Remove item breakdown`;
+        } else {
+          wrap.hidden = true;
+          wrap.innerHTML = '';
+          amountInput.readOnly = false;
+          toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/></svg> Break this down into items`;
+        }
+      }
+
+      setEditItemized(editItemized);
+      document.getElementById('editTxnItemToggle').addEventListener('click', () => setEditItemized(!editItemized));
+
       const updateEditCategoryList = () => {
         const dept = departments.find((d) => d.id === Number(document.getElementById('editTxnDept').value));
         const list = document.getElementById('editCategoryList');
@@ -465,6 +627,8 @@ function openEditTransactionModal(txn) {
       document.getElementById('editTxnCancel').addEventListener('click', closeModal);
       document.getElementById('editTxnSave').addEventListener('click', async () => {
         const btn = document.getElementById('editTxnSave');
+        const items = editItemized ? getItemPayload('editTxn') : [];
+        if (editItemized && items.length === 0) return showToast('Add at least one item with a description, quantity and price.', 'error');
         const payload = {
           date: document.getElementById('editTxnDate').value,
           departmentId: Number(document.getElementById('editTxnDept').value),
@@ -472,6 +636,7 @@ function openEditTransactionModal(txn) {
           category: document.getElementById('editTxnCategory').value,
           amount: Number(document.getElementById('editTxnAmount').value),
           particulars: document.getElementById('editTxnParticulars').value,
+          items,
         };
         if (!payload.amount || payload.amount <= 0) return showToast('Amount must be a positive number.', 'error');
         setBtnLoading(btn, true);
@@ -490,14 +655,43 @@ function openEditTransactionModal(txn) {
   });
 }
 
+let txnItemized = false;
+
+function setTxnItemized(on) {
+  txnItemized = on;
+  const wrap = document.getElementById('txnItemEditorWrap');
+  const amountInput = document.getElementById('txnAmount');
+  const toggleBtn = document.getElementById('txnItemToggle');
+
+  if (on) {
+    wrap.hidden = false;
+    wrap.innerHTML = renderItemEditorHtml('txn', null);
+    wireItemEditor('txn', (total) => {
+      amountInput.value = total ? total.toFixed(2) : '';
+    });
+    amountInput.readOnly = true;
+    toggleBtn.innerHTML = `${ICONS.trash} Remove item breakdown`;
+  } else {
+    wrap.hidden = true;
+    wrap.innerHTML = '';
+    amountInput.readOnly = false;
+    amountInput.value = '';
+    toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/></svg> Break this down into items`;
+  }
+}
+
 function setupTransactionForm() {
   document.getElementById('txnDept').addEventListener('change', updateCategoryList);
   document.getElementById('txnDirection').addEventListener('change', updateCategoryList);
   document.getElementById('filterBtn').addEventListener('click', refreshTxnTable);
+  document.getElementById('txnItemToggle').addEventListener('click', () => setTxnItemized(!txnItemized));
 
   document.getElementById('txnForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('txnSubmitBtn');
+    const items = txnItemized ? getItemPayload('txn') : [];
+    if (txnItemized && items.length === 0) return showToast('Add at least one item with a description, quantity and price.', 'error');
+
     const payload = {
       date: document.getElementById('txnDate').value,
       departmentId: Number(document.getElementById('txnDept').value),
@@ -505,14 +699,15 @@ function setupTransactionForm() {
       category: document.getElementById('txnCategory').value,
       amount: Number(document.getElementById('txnAmount').value),
       particulars: document.getElementById('txnParticulars').value,
+      items,
     };
     setBtnLoading(btn, true);
     try {
       await api('/api/transactions', { method: 'POST', body: JSON.stringify(payload) });
       showToast('Transaction saved.');
       document.getElementById('txnCategory').value = '';
-      document.getElementById('txnAmount').value = '';
       document.getElementById('txnParticulars').value = '';
+      setTxnItemized(false);
       document.getElementById('txnCategory').focus();
       refreshTxnTable();
     } catch (err) {

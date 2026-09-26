@@ -460,6 +460,9 @@ tbody tr:hover { background: var(--surface-alt); }
 .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
 .badge.active { background: var(--accent-bg); color: var(--accent-600); }
 .badge.inactive { background: #eef0f3; color: var(--text-500); }
+.badge.items-badge { background: var(--primary-50); color: var(--primary-700); border: none; cursor: pointer; margin-left: 6px; white-space: nowrap; }
+.badge.items-badge:hover { background: var(--primary-100); }
+.badge.items-badge svg { width: 12px; height: 12px; }
 
 .empty-state { text-align: center; padding: 40px 20px; color: var(--text-500); }
 .empty-state svg { width: 36px; height: 36px; color: var(--text-400); margin-bottom: 10px; }
@@ -473,6 +476,51 @@ tbody tr:hover { background: var(--surface-alt); }
 .chip button:hover { background: rgba(37,99,166,0.15); }
 .chip button svg { width: 12px; height: 12px; }
 .chip-input input { border: none; outline: none; flex: 1; min-width: 120px; font-size: 13.5px; padding: 4px; background: transparent; }
+
+/* ---------- Itemized amount breakdown ---------- */
+.item-breakdown-toggle {
+  background: transparent; border: none; padding: 0; margin-top: 6px;
+  color: var(--primary-600); font-size: 12.5px; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.item-breakdown-toggle:hover { color: var(--primary-700); text-decoration: underline; }
+.item-breakdown-toggle svg { width: 14px; height: 14px; }
+.amount-computed-hint { font-size: 11.5px; color: var(--text-400); margin-top: 5px; }
+
+.item-editor-wrap { grid-column: 1 / -1; }
+.item-editor {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  background: var(--surface-alt);
+  margin-top: 4px;
+}
+.item-editor-header, .item-row {
+  display: grid;
+  grid-template-columns: 1fr 72px 110px 110px 30px;
+  gap: 8px;
+  align-items: center;
+}
+.item-editor-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-500); padding: 0 2px 8px; }
+.item-row { margin-bottom: 8px; }
+.item-row input {
+  padding: 7px 9px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 13.5px; font-family: inherit; background: var(--surface);
+}
+.item-row input:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 3px var(--primary-100); }
+.item-line-total { font-size: 13.5px; font-weight: 600; color: var(--text-700); text-align: right; padding-right: 4px; }
+.item-editor-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-strong); }
+.item-editor-total { font-size: 13.5px; }
+.item-editor-total strong { color: var(--text-900); font-size: 15px; }
+
+@media (max-width: 640px) {
+  .item-editor-header { display: none; }
+  .item-row { grid-template-columns: 1fr 1fr; grid-template-areas: "desc desc" "qty price" "total remove"; }
+  .item-row input[data-item-desc] { grid-area: desc; }
+  .item-row input[data-item-qty] { grid-area: qty; }
+  .item-row input[data-item-price] { grid-area: price; }
+  .item-row .item-line-total { grid-area: total; }
+  .item-row [data-remove-item] { grid-area: remove; justify-self: end; }
+}
 
 /* ---------- Modal ---------- */
 .modal-overlay {
