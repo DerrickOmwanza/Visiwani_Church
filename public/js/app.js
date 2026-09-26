@@ -285,6 +285,11 @@ function setupNav() {
       document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
       item.classList.add('active');
       document.getElementById('view-' + item.dataset.view).classList.add('active');
+      // Every view shares one scroll position (they're just toggled via a
+      // CSS class, not separate documents). Without resetting it, scrolling
+      // to the bottom of a long page (e.g. Reports) and then clicking to a
+      // short one (e.g. Dashboard) lands already scrolled past its content.
+      window.scrollTo(0, 0);
       onViewShown(item.dataset.view);
     });
   });
@@ -309,6 +314,7 @@ function setupSubtabs() {
         tabBar.parentElement.querySelectorAll('.subtab-panel').forEach((p) => p.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById(panelId).classList.add('active');
+        window.scrollTo(0, 0);
       });
     });
   });

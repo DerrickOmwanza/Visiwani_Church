@@ -541,6 +541,7 @@ tbody tr:hover { background: var(--surface-alt); }
 .item-row { margin-bottom: 8px; }
 .item-row input {
   padding: 7px 9px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 13.5px; font-family: inherit; background: var(--surface);
+  min-width: 0; width: 100%;
 }
 .item-row input:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 3px var(--primary-100); }
 .item-line-total { font-size: 13.5px; font-weight: 600; color: var(--text-700); text-align: right; padding-right: 4px; }
@@ -637,4 +638,19 @@ tbody tr:hover { background: var(--surface-alt); }
   .app-shell { flex-direction: column; }
   .main { margin-left: 0; }
   .page-header, .page-body { padding-left: 18px; padding-right: 18px; }
+}
+
+@media (max-width: 520px) {
+  /* repeat(auto-fit, minmax(170px, 1fr)) can squeeze in a second column at
+     borderline phone widths, compressing it below its own 170px minimum
+     (confirmed: 390px wide screens rendered "170px 124px" - two cramped
+     columns instead of one usable one, which is what broke the item
+     editor below). Forcing one column here is simpler and more robust
+     than trying to out-guess auto-fit at every possible width. */
+  .form-grid { grid-template-columns: 1fr; }
+  /* Some fields carry an inline `grid-column: span 2` to sit full-width in
+     the 2-column desktop grid. With only 1 explicit column here, that span
+     can't fit and the browser silently adds an implicit second column to
+     satisfy it - `!important` is required to beat the inline style. */
+  .form-grid .form-field { grid-column: 1 / -1 !important; }
 }
