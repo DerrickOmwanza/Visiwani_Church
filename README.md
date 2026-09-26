@@ -90,6 +90,20 @@ Then open http://localhost:3000 in your browser.
 4. **Dashboard** — a quick at-a-glance view of this month's totals and
    every department's current balance.
 
+## Forgot your password?
+
+There's no "forgot password" link inside the app — it's a local system
+with no email to send a reset link to. If a login is ever lost, whoever
+set up the system can reset it from the project folder:
+
+```bash
+npm run reset-password -- treasurer newPasswordHere
+```
+
+(replace `treasurer` with the actual username if it was changed, and
+`newPasswordHere` with the new password — at least 6 characters). The
+server does not need to be running for this.
+
 ## Backing up your records
 
 All church financial data lives in one file: `data/db.json`. Back this

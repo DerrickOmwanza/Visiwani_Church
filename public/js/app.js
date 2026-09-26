@@ -702,6 +702,8 @@ function setupSettings() {
     const btn = document.getElementById('pwSubmitBtn');
     const currentPassword = document.getElementById('curPw').value;
     const newPassword = document.getElementById('newPw').value;
+    const newPasswordConfirm = document.getElementById('newPwConfirm').value;
+    if (newPassword !== newPasswordConfirm) return showToast("New password and confirmation don't match.", 'error');
     setBtnLoading(btn, true);
     try {
       await api('/api/auth/change-password', { method: 'POST', body: JSON.stringify({ currentPassword, newPassword }) });

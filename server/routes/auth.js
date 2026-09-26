@@ -35,7 +35,12 @@ router.post('/change-password', (req, res) => {
 
   const user = db.state.users.find((u) => u.id === req.session.userId);
   if (!user || !bcrypt.compareSync(currentPassword, user.passwordHash)) {
-    return res.status(401).json({ error: 'Current password is incorrect' });
+    // 400, not 401: the session is valid (checked above) - this is a wrong
+    // answer to a question, not an authentication failure. The frontend's
+    // shared api() helper treats any 401 as "your session is gone, go to
+    // login" and would otherwise silently bounce the user to the login
+    // page instead of showing them "current password is incorrect".
+    return res.status(400).json({ error: 'Current password is incorrect' });
   }
   user.passwordHash = bcrypt.hashSync(newPassword, 10);
   db.save();
