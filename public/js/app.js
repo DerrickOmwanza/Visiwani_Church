@@ -1,6 +1,14 @@
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const fmtMoney = (n) => 'Ksh ' + Number(n || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const todayStr = () => new Date().toISOString().slice(0, 10);
+// Deliberately NOT `new Date().toISOString().slice(0, 10)` - toISOString()
+// converts to UTC first, which silently returns yesterday's date (and
+// sometimes the wrong month) for a few hours after local midnight in any
+// timezone ahead of UTC (e.g. Kenya, UTC+3). Every date the treasurer sees
+// or picks should match her own wall clock, not UTC.
+const todayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 let departments = [];
