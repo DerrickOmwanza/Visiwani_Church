@@ -33,9 +33,26 @@ app.use(
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 12 }, // 12 hours
+    // rolling: true renews the cookie's expiry on every request, not just at
+    // login. Without it a session expires exactly N hours after logging in
+    // even if actively in use the whole time - confirmed this was the case
+    // (no Set-Cookie sent on later requests) before adding this. The app is
+    // meant to stay open through a workday, so an active treasurer should
+    // never be silently bounced to the login screen mid-task.
+    rolling: true,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 24 hours of inactivity before logout
   })
 );
+
+// Every /api response carries session-derived or financial data - none of
+// it should ever be served from a cache. Confirmed Express sends no
+// Cache-Control on JSON responses by default (only an ETag), which left
+// room for a stale "yes, logged in" or stale balance to be reused, e.g.
+// after using the browser's Back button post-logout.
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/departments', requireLogin, departmentRoutes);
@@ -70,6 +87,11 @@ process.on('uncaughtException', (err) => console.error('Uncaught exception:', er
 cron.start();
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+// Bind to localhost only. Without an explicit host, Node listens on every
+// network interface (0.0.0.0) - on a home or church WiFi network, that
+// would make this financial system reachable by any other device on the
+// same network, not just the treasurer's own computer, contrary to how
+// the whole app is designed and documented ("runs on your own computer").
+app.listen(PORT, '127.0.0.1', () => {
   console.log(`Visiwani SDA Church Books running at http://localhost:${PORT}`);
 });

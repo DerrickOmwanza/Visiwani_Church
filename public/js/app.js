@@ -208,10 +208,12 @@ function setupNav() {
 }
 
 function onViewShown(view) {
-  if (view === 'dashboard') loadDashboard();
-  if (view === 'transactions') loadTransactions();
-  if (view === 'departments') loadDepartments();
-  if (view === 'reports') loadGeneratedReports();
+  // These run unawaited as soon as a nav item is clicked, with no caller to
+  // report a failure to. api() already redirects to login itself on a 401
+  // before throwing, so nothing further is needed here - this just stops a
+  // session that expired between clicks from surfacing as a console error.
+  const loaders = { dashboard: loadDashboard, transactions: loadTransactions, departments: loadDepartments, reports: loadGeneratedReports };
+  loaders[view]?.().catch(() => {});
 }
 
 /* ---------------- Departments (shared) ---------------- */
@@ -848,7 +850,7 @@ async function init() {
   setupSettings();
   populateReportDefaults();
 
-  await loadDashboard();
+  await loadDashboard().catch(() => {});
 }
 
 init();
