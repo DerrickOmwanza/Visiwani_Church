@@ -167,10 +167,15 @@ function wireChipInput(id) {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       const value = input.value.trim();
-      if (value) {
-        input.insertAdjacentHTML('beforebegin', chipHtml(value));
+      if (!value) return;
+      const isDuplicate = getChipValues(id).some((v) => v.toLowerCase() === value.toLowerCase());
+      if (isDuplicate) {
+        showToast(`"${value}" is already in the list.`, 'error');
         input.value = '';
+        return;
       }
+      input.insertAdjacentHTML('beforebegin', chipHtml(value));
+      input.value = '';
     } else if (e.key === 'Backspace' && !input.value) {
       const chips = wrap.querySelectorAll('.chip');
       if (chips.length) chips[chips.length - 1].remove();
@@ -341,7 +346,7 @@ function renderTxnTable(list, showActions = true) {
       <td class="wrap">${esc(t.particulars || '')}</td>
       <td class="${t.direction === 'in' ? 'amount-in' : ''}">${t.direction === 'in' ? fmtMoney(t.amount) : ''}</td>
       <td class="${t.direction === 'out' ? 'amount-out' : ''}">${t.direction === 'out' ? fmtMoney(t.amount) : ''}</td>
-      ${showActions ? `<td><div class="row-actions"><button class="icon-btn danger" title="Delete" data-del="${t.id}">${ICONS.trash}</button></div></td>` : ''}
+      ${showActions ? `<td><div class="row-actions"><button class="icon-btn" title="Edit" data-edit-txn="${t.id}">${ICONS.edit}</button><button class="icon-btn danger" title="Delete" data-del="${t.id}">${ICONS.trash}</button></div></td>` : ''}
     </tr>`
     )
     .join('');
@@ -380,6 +385,106 @@ async function refreshTxnTable() {
       showToast('Transaction deleted.');
       refreshTxnTable();
     });
+  });
+  container.querySelectorAll('[data-edit-txn]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const txn = list.find((t) => t.id === Number(btn.dataset.editTxn));
+      if (txn) openEditTransactionModal(txn);
+    });
+  });
+}
+
+function openEditTransactionModal(txn) {
+  // Every department is offered here, active or not - the transaction
+  // might already belong to a fund that's since been deactivated, and
+  // editing it shouldn't force moving it elsewhere.
+  const deptOptions = departments
+    .map((d) => `<option value="${d.id}" ${d.id === txn.departmentId ? 'selected' : ''}>${esc(d.name)}${d.active === false ? ' (Inactive)' : ''}</option>`)
+    .join('');
+
+  openModal({
+    title: 'Edit Transaction',
+    subtitle: 'Correct a mistake without deleting and re-entering the whole record.',
+    wide: true,
+    bodyHtml: `
+      <form id="editTxnForm">
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Date</label>
+            <input type="date" id="editTxnDate" value="${txn.date}" required />
+          </div>
+          <div class="form-field">
+            <label>Department / Fund</label>
+            <select id="editTxnDept" required>${deptOptions}</select>
+          </div>
+          <div class="form-field">
+            <label>Type</label>
+            <select id="editTxnDirection" required>
+              <option value="in" ${txn.direction === 'in' ? 'selected' : ''}>Income (Cash In)</option>
+              <option value="out" ${txn.direction === 'out' ? 'selected' : ''}>Expense (Cash Out)</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Category</label>
+            <input list="editCategoryList" id="editTxnCategory" value="${esc(txn.category)}" required />
+            <datalist id="editCategoryList"></datalist>
+          </div>
+          <div class="form-field">
+            <label>Amount (Ksh)</label>
+            <input type="number" id="editTxnAmount" min="0" step="0.01" value="${txn.amount}" required />
+          </div>
+          <div class="form-field" style="grid-column: span 2;">
+            <label>Particulars / Notes</label>
+            <input type="text" id="editTxnParticulars" value="${esc(txn.particulars || '')}" />
+          </div>
+        </div>
+      </form>`,
+    footerHtml: `
+      <button class="btn secondary" id="editTxnCancel">Cancel</button>
+      <button class="btn" id="editTxnSave">
+        <span class="spinner"></span><span class="btn-label">Save Changes</span>
+      </button>`,
+    onOpen: () => {
+      const updateEditCategoryList = () => {
+        const dept = departments.find((d) => d.id === Number(document.getElementById('editTxnDept').value));
+        const list = document.getElementById('editCategoryList');
+        list.innerHTML = '';
+        if (!dept) return;
+        const items = document.getElementById('editTxnDirection').value === 'in' ? dept.incomeItems : dept.expenseItems;
+        (items || []).forEach((item) => {
+          const opt = document.createElement('option');
+          opt.value = item;
+          list.appendChild(opt);
+        });
+      };
+      updateEditCategoryList();
+      document.getElementById('editTxnDept').addEventListener('change', updateEditCategoryList);
+      document.getElementById('editTxnDirection').addEventListener('change', updateEditCategoryList);
+      document.getElementById('editTxnCancel').addEventListener('click', closeModal);
+      document.getElementById('editTxnSave').addEventListener('click', async () => {
+        const btn = document.getElementById('editTxnSave');
+        const payload = {
+          date: document.getElementById('editTxnDate').value,
+          departmentId: Number(document.getElementById('editTxnDept').value),
+          direction: document.getElementById('editTxnDirection').value,
+          category: document.getElementById('editTxnCategory').value,
+          amount: Number(document.getElementById('editTxnAmount').value),
+          particulars: document.getElementById('editTxnParticulars').value,
+        };
+        if (!payload.amount || payload.amount <= 0) return showToast('Amount must be a positive number.', 'error');
+        setBtnLoading(btn, true);
+        try {
+          await api('/api/transactions/' + txn.id, { method: 'PUT', body: JSON.stringify(payload) });
+          showToast('Transaction updated.');
+          closeModal();
+          refreshTxnTable();
+        } catch (err) {
+          showToast(err.message, 'error');
+        } finally {
+          setBtnLoading(btn, false);
+        }
+      });
+    },
   });
 }
 
@@ -576,11 +681,19 @@ function setupDepartmentForm() {
     setBtnLoading(btn, true);
     try {
       const category = `Prior Records Catch-Up${label ? ' (' + label + ')' : ''}`;
+      let incomeSaved = false;
       if (income > 0) {
         await api('/api/transactions', { method: 'POST', body: JSON.stringify({ date, departmentId, direction: 'in', category, amount: income, particulars: label }) });
+        incomeSaved = true;
       }
       if (expense > 0) {
-        await api('/api/transactions', { method: 'POST', body: JSON.stringify({ date, departmentId, direction: 'out', category, amount: expense, particulars: label }) });
+        try {
+          await api('/api/transactions', { method: 'POST', body: JSON.stringify({ date, departmentId, direction: 'out', category, amount: expense, particulars: label }) });
+        } catch (err) {
+          // The income half may already be saved - say so plainly rather
+          // than leaving her guessing whether anything was recorded.
+          throw new Error(incomeSaved ? `The income total was recorded, but the expense total failed: ${err.message}. Check Transaction History before re-entering it.` : err.message);
+        }
       }
       showToast(`Recorded ${label || 'period'} totals for ${departments.find((d) => d.id === departmentId)?.name || 'department'}.`);
       document.getElementById('catchupForm').reset();

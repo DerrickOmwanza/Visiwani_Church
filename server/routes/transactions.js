@@ -8,6 +8,20 @@ function serialize(t) {
   return { ...t, departmentName: dept ? dept.name : 'Unknown' };
 }
 
+// Every date computation in this app (running balances, week-of-month,
+// quarter/month boundaries) relies on "YYYY-MM-DD" strings sorting and
+// parsing correctly. The browser's <input type="date"> always produces
+// that shape, but a direct API call could send anything - checking it
+// here keeps one bad date from silently corrupting that one entry's
+// place in every report it appears in.
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+function isValidDate(dateStr) {
+  if (!DATE_RE.test(dateStr)) return false;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+}
+
 // GET /api/transactions?from=YYYY-MM-DD&to=YYYY-MM-DD&departmentId=1&direction=in
 router.get('/', (req, res) => {
   const { from, to, departmentId, direction } = req.query;
@@ -26,6 +40,7 @@ router.post('/', (req, res) => {
   const { date, departmentId, direction, category, amount, particulars, recordedBy } = req.body || {};
 
   if (!date) return res.status(400).json({ error: 'Date is required' });
+  if (!isValidDate(date)) return res.status(400).json({ error: 'Date must be a valid date in YYYY-MM-DD format' });
   if (!departmentId) return res.status(400).json({ error: 'Department is required' });
   if (direction !== 'in' && direction !== 'out') return res.status(400).json({ error: "Direction must be 'in' or 'out'" });
   const numAmount = Number(amount);
@@ -55,14 +70,17 @@ router.put('/:id', (req, res) => {
   if (!txn) return res.status(404).json({ error: 'Transaction not found' });
 
   const { date, departmentId, direction, category, amount, particulars } = req.body || {};
-  if (date) txn.date = date;
+  if (date) {
+    if (!isValidDate(date)) return res.status(400).json({ error: 'Date must be a valid date in YYYY-MM-DD format' });
+    txn.date = date;
+  }
   if (departmentId) {
     const dept = db.state.departments.find((d) => d.id === Number(departmentId));
     if (!dept) return res.status(400).json({ error: 'Unknown department' });
     txn.departmentId = Number(departmentId);
   }
   if (direction === 'in' || direction === 'out') txn.direction = direction;
-  if (category !== undefined) txn.category = category.trim();
+  if (category !== undefined) txn.category = category.trim() || (txn.direction === 'in' ? 'Other Income' : 'Other Expense');
   if (amount !== undefined) {
     const numAmount = Number(amount);
     if (!numAmount || numAmount <= 0) return res.status(400).json({ error: 'Amount must be a positive number' });
