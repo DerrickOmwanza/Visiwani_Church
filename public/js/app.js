@@ -297,6 +297,23 @@ function setupNav() {
   });
 }
 
+// Splits a single busy page into separate, clearly-labeled tasks (e.g.
+// day-to-day department management vs. the one-time catch-up setup step)
+// so the whole page doesn't read as one big undifferentiated form.
+function setupSubtabs() {
+  document.querySelectorAll('.subtabs').forEach((tabBar) => {
+    tabBar.querySelectorAll('.subtab-item').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const panelId = 'subtab-' + btn.dataset.subtab;
+        tabBar.querySelectorAll('.subtab-item').forEach((b) => b.classList.remove('active'));
+        tabBar.parentElement.querySelectorAll('.subtab-panel').forEach((p) => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(panelId).classList.add('active');
+      });
+    });
+  });
+}
+
 function onViewShown(view) {
   // These run unawaited as soon as a nav item is clicked, with no caller to
   // report a failure to. api() already redirects to login itself on a 401
@@ -566,6 +583,7 @@ function openEditTransactionModal(txn) {
             <label>Category</label>
             <input list="editCategoryList" id="editTxnCategory" value="${esc(txn.category)}" required />
             <datalist id="editCategoryList"></datalist>
+            <div class="hint">Groups this with similar entries in your reports</div>
           </div>
           <div class="form-field">
             <label>Amount (Ksh)</label>
@@ -575,6 +593,7 @@ function openEditTransactionModal(txn) {
           <div class="form-field" style="grid-column: span 2;">
             <label>Particulars / Notes</label>
             <input type="text" id="editTxnParticulars" value="${esc(txn.particulars || '')}" />
+            <div class="hint">Just for your own reference — not used to group reports</div>
           </div>
           <div id="editTxnItemEditorWrap" class="item-editor-wrap" ${txn.items && txn.items.length ? '' : 'hidden'}>${txn.items && txn.items.length ? renderItemEditorHtml('editTxn', txn.items) : ''}</div>
         </div>
@@ -1038,6 +1057,7 @@ async function init() {
   }
 
   setupModalChrome();
+  setupSubtabs();
   setupNav();
   setupTransactionForm();
   setupDepartmentForm();

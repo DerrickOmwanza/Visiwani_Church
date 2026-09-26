@@ -376,6 +376,42 @@ a { color: inherit; }
 .view { display: none; }
 .view.active { display: block; }
 
+/* ---------- Sub-tabs (splitting a busy page into distinct tasks) ---------- */
+.subtabs { display: flex; gap: 4px; border-bottom: 1.5px solid var(--border); margin-bottom: 24px; }
+.subtab-item {
+  padding: 11px 6px; margin-right: 22px;
+  background: none; border: none; border-bottom: 2.5px solid transparent;
+  font-size: 14px; font-weight: 600; color: var(--text-500); cursor: pointer;
+  display: flex; align-items: center; gap: 7px;
+  transform: translateY(1.5px);
+}
+.subtab-item svg { width: 16px; height: 16px; }
+.subtab-item:hover { color: var(--text-900); }
+.subtab-item.active { color: var(--primary-600); border-bottom-color: var(--primary-600); }
+.subtab-panel { display: none; }
+.subtab-panel.active { display: block; }
+
+/* ---------- Info / guide callout ---------- */
+.guide-box {
+  background: var(--primary-50);
+  border: 1px solid var(--primary-100);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: var(--text-700);
+}
+.guide-box strong { color: var(--primary-700); }
+.guide-box ul { margin: 8px 0 0; padding-left: 18px; }
+.guide-box li { margin-bottom: 4px; }
+.report-section-title {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-500); margin: 28px 0 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.report-section-title:first-of-type { margin-top: 0; }
+.report-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
 /* ---------- Cards & stats ---------- */
 .cards-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
 .stat-card {
