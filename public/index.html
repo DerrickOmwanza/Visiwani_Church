@@ -380,6 +380,38 @@
             <div class="card-head">
               <div>
                 <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 9h6v12H9z"/></svg>
+                  Department Ledger
+                </h3>
+                <p class="desc">A running cash book for one fund — Date, Particulars, Cash In, Cash Out, Balance — just like the paper account books (e.g. Building)</p>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Department</label>
+                <select id="ledgerDept"></select>
+              </div>
+              <div class="form-field">
+                <label>From</label>
+                <input type="date" id="ledgerFrom" />
+              </div>
+              <div class="form-field">
+                <label>To</label>
+                <input type="date" id="ledgerTo" />
+              </div>
+              <div class="form-field">
+                <button class="btn" id="ledgerBtn" type="button">
+                  <span class="spinner"></span>
+                  <span class="btn-label">Download Excel</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3"/></svg>
                   Auto-Generated Quarterly Reports
                 </h3>

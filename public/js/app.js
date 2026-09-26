@@ -211,7 +211,7 @@ async function loadDepartmentOptions() {
   // reach a deactivated department's history - deactivating a fund never
   // deletes its past records, so those pickers list every department.
   const entryOnlySelects = ['txnDept', 'catchupDept'];
-  const reportingSelects = ['filterDept', 'monthlyDept', 'annualDept', 'rangeDept'];
+  const reportingSelects = ['filterDept', 'monthlyDept', 'annualDept', 'rangeDept', 'ledgerDept'];
 
   function fillSelect(id, list, keepFirst) {
     const el = document.getElementById(id);
@@ -602,6 +602,8 @@ function populateReportDefaults() {
   const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
   document.getElementById('rangeFrom').value = firstOfMonth;
   document.getElementById('rangeTo').value = todayStr();
+  document.getElementById('ledgerFrom').value = firstOfMonth;
+  document.getElementById('ledgerTo').value = todayStr();
 }
 
 function setupReportButtons() {
@@ -633,6 +635,15 @@ function setupReportButtons() {
     const params = new URLSearchParams({ from, to });
     if (dept) params.set('departmentId', dept);
     downloadReport('/api/reports/range?' + params.toString(), e.currentTarget);
+  });
+
+  document.getElementById('ledgerBtn').addEventListener('click', (e) => {
+    const dept = document.getElementById('ledgerDept').value;
+    const from = document.getElementById('ledgerFrom').value;
+    const to = document.getElementById('ledgerTo').value;
+    if (!dept) return showToast('Add a department first.', 'error');
+    if (!from || !to) return showToast('Choose both a "from" and "to" date.', 'error');
+    downloadReport(`/api/reports/ledger/${dept}?from=${from}&to=${to}`, e.currentTarget);
   });
 
   document.getElementById('genBtn').addEventListener('click', async (e) => {

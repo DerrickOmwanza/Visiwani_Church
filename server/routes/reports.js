@@ -86,6 +86,7 @@ router.get('/ledger/:departmentId', asyncHandler(async (req, res) => {
   if (!department) return res.status(404).json({ error: 'Department not found' });
   const { from, to } = req.query;
   if (!from || !to) return res.status(400).json({ error: 'from and to dates are required' });
+  if (from > to) return res.status(400).json({ error: '"from" date must be before "to" date' });
 
   const wb = builder.buildDepartmentLedger({ department, transactions: db.state.transactions, from, to });
   await sendWorkbook(res, wb, `Visiwani_${department.name.replace(/\s+/g, '_')}_Ledger_${from}_to_${to}.xlsx`);
